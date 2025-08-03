@@ -8,7 +8,13 @@ def clone_model(model):
 def sample_batch(dataset, batch_size=4):
     return random.sample(dataset, batch_size)
 
-def sample_outputs(policy, question, group_size): pass
+def sample_outputs(policy_model, question, group_size):
+    outputs = []
+    for _ in range(group_size):
+        output = policy_model.run(question)
+        outputs.append(output)
+    return outputs
+
 def compute_group_advantages(rewards): pass
 def update_policy_with_grpo(): pass
 
