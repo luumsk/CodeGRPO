@@ -1,11 +1,13 @@
-import copy
+import copy, random
 
 
 def clone_model(model): 
     cloned = copy.deepcopy(model)
     return cloned
 
-def sample_batch(dataset): pass
+def sample_batch(dataset, batch_size=4):
+    return random.sample(dataset, batch_size)
+
 def sample_outputs(policy, question, group_size): pass
 def compute_group_advantages(rewards): pass
 def update_policy_with_grpo(): pass
