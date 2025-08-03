@@ -1,3 +1,5 @@
+# Paper: https://arxiv.org/pdf/2402.03300
+
 import copy, random
 import torch
 
@@ -31,15 +33,15 @@ def update_policy(): pass
 
 
 def grpo(
-    pi_theta_init,  # initial policy model
-    r_phi,          # reward function
-    D,              # dataset of questions
-    epsilon,        # clip parameter
-    beta,           # KL divergence coefficient
-    mu,             # number of GRPO optimization steps per batch
-    I,              # number of outer iterations
-    M,              # number of batches per iteration
-    G               # number of sampled outputs per question     
+    pi_theta_init, # initial policy model
+    r_phi, # reward function
+    D, # dataset of questions
+    epsilon, # clip parameter
+    beta, # KL divergence coefficient
+    mu, # number of GRPO optimization steps per batch
+    I, # number of iterations
+    M, # number of batches per iteration
+    G # number of sample outputs per question     
 ):
     pi_theta = clone_model(pi_theta_init)
     
