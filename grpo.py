@@ -18,6 +18,16 @@ def sample_outputs(policy_model, question, group_size):
         outputs.append(output)
     return outputs
 
+def get_groundtruth(question):
+    return "ground_truth_answer_for_" + question
+
+def reward_function(question, output):
+    ground_truth = get_groundtruth(question)
+    if output == ground_truth:
+        return 1.0
+    else:
+        return 0.0
+
 def compute_advantages(rewards):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
@@ -25,8 +35,6 @@ def compute_advantages(rewards):
     advantages = ((r - mean) / (std + 1e-8)).tolist()
     return advantages
 
-def reward_function(question, output):
-    return random.uniform(0, 1)
 
 def update_policy(): pass
 
