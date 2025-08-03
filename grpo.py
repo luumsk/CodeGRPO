@@ -1,4 +1,5 @@
 import copy, random
+import torch
 
 
 def clone_model(model): 
@@ -15,7 +16,13 @@ def sample_outputs(policy_model, question, group_size):
         outputs.append(output)
     return outputs
 
-def compute_group_advantages(rewards): pass
+def compute_group_advantages(rewards):
+    r = torch.tensor(rewards, dtype=torch.float32)
+    mean = r.mean()
+    std = r.std(unbiased=False)
+    advantages = ((r - mean) / (std + 1e-8)).tolist()
+    return advantages
+
 def update_policy_with_grpo(): pass
 
 
