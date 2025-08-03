@@ -1,8 +1,16 @@
-def clone_model(model): pass
+import copy
+
+
+def clone_model(model): 
+    cloned = copy.deepcopy(model)
+    return cloned
+
 def sample_batch(dataset): pass
 def sample_outputs(policy, question, group_size): pass
 def compute_group_advantages(rewards): pass
 def update_policy_with_grpo(): pass
+
+
 
 def grpo(
     pi_theta_init,  # initial policy model
