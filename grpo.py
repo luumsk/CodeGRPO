@@ -1,7 +1,13 @@
+def clone_model(model): pass
+def sample_batch(dataset): pass
+def sample_outputs(policy, question, group_size): pass
+def compute_group_advantages(rewards): pass
+def update_policy_with_grpo(): pass
+
 def grpo(
     pi_theta_init,  # initial policy model
     r_phi,          # reward function
-    D,              # dataset of prompts
+    D,              # dataset of questions
     epsilon,        # clip parameter
     beta,           # KL divergence coefficient
     mu,             # number of GRPO optimization steps per batch
@@ -9,9 +15,29 @@ def grpo(
     M,              # number of batches per iteration
     G               # number of sampled outputs per question     
 ):
-    pi_theta = pi_theta_init.clone()
+    pi_theta = clone_model(pi_theta_init)
     
-    # Algorithm here
+    for i in range(I):
+        pi_ref = clone_model(pi_theta)
+
+        for m in range(M):
+            D_b = sample_batch(D)
+            pi_theta_old = clone_model(pi_theta)
+
+            all_outputs = []
+            all_rewards = []
+            all_advantages = []
+
+            for q in D_b:
+                outputs = sample_outputs(pi_theta_old, q, G)
+                rewards = [r_phi(q, o) for o in outputs]
+                advantages = compute_group_advantages(rewards)
+
+                all_outputs.append(outputs)
+                all_rewards.append(rewards)
+                all_advantages.append(advantages)
+
+            for _ in range(mu):
+                pi_theta = update_policy_with_grpo()
     
-    # Return the optimized policy model
     return pi_theta 
