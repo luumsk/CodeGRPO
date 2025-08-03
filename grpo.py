@@ -39,7 +39,7 @@ def compute_advantages(rewards, output_lengths):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
     std = r.std(unbiased=False)
-    normalized_r = ((r - mean) / (std + 1e-8))
+    normalized_r = (r - mean) / (std + 1e-8)
 
     advantages = []
     for norm_r_i, length in zip(normalized_r, output_lengths):
