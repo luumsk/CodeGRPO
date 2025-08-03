@@ -13,10 +13,17 @@ def sample_batch(dataset, batch_size=4):
 
 def sample_outputs(policy_model, question, group_size):
     outputs = []
+    output_lengths = []
+
     for _ in range(group_size):
         output = policy_model.run(question)
         outputs.append(output)
-    return outputs
+        tokenized = policy_model.tokenizer.encode(
+            output, 
+            add_special_tokens=False, 
+        )
+        output_lengths.append(len(tokenized))
+    return outputs, output_lengths
 
 def get_groundtruth(question):
     return "ground_truth_answer_for_" + question
@@ -28,11 +35,15 @@ def reward_function(question, output):
     else:
         return 0.0
 
-def compute_advantages(rewards):
+def compute_advantages(rewards, output_lengths):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
     std = r.std(unbiased=False)
-    advantages = ((r - mean) / (std + 1e-8)).tolist()
+    normalized_r = ((r - mean) / (std + 1e-8))
+
+    advantages = []
+    for norm_r_i, length in zip(normalized_r, output_lengths):
+        advantages.extend([norm_r_i] * length)
     return advantages
 
 
@@ -65,9 +76,9 @@ def grpo(
             all_advantages = []
 
             for q in D_b:
-                outputs = sample_outputs(pi_theta_old, q, G)
+                outputs, output_lengths = sample_outputs(pi_theta_old, q, G)
                 rewards = [r_phi(q, o) for o in outputs]
-                advantages = compute_advantages(rewards)
+                advantages = compute_advantages(rewards, output_lengths)
 
                 all_outputs.append(outputs)
                 all_rewards.append(rewards)
