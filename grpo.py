@@ -16,14 +16,17 @@ def sample_outputs(policy_model, question, group_size):
         outputs.append(output)
     return outputs
 
-def compute_group_advantages(rewards):
+def compute_advantages(rewards):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
     std = r.std(unbiased=False)
     advantages = ((r - mean) / (std + 1e-8)).tolist()
     return advantages
 
-def update_policy_with_grpo(): pass
+def reward_function(question, output):
+    return random.uniform(0, 1)
+
+def update_policy(): pass
 
 
 
@@ -54,13 +57,13 @@ def grpo(
             for q in D_b:
                 outputs = sample_outputs(pi_theta_old, q, G)
                 rewards = [r_phi(q, o) for o in outputs]
-                advantages = compute_group_advantages(rewards)
+                advantages = compute_advantages(rewards)
 
                 all_outputs.append(outputs)
                 all_rewards.append(rewards)
                 all_advantages.append(advantages)
 
             for _ in range(mu):
-                pi_theta = update_policy_with_grpo()
+                pi_theta = update_policy()
     
     return pi_theta 
