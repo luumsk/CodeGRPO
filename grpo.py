@@ -4,14 +4,13 @@ import copy, random
 import torch
 
 
-def clone_model(model): 
-    cloned = copy.deepcopy(model)
-    return cloned
+def copy_model(model): 
+    return copy.deepcopy(model)
 
 def sample_batch(dataset, batch_size=4):
     return random.sample(dataset, batch_size)
 
-def sample_outputs(policy_model, question, group_size):
+def generate_outputs(policy_model, question, group_size):
     outputs = []
     output_lengths = []
 
@@ -30,14 +29,14 @@ def get_groundtruth(question):
 
 
 # Outcome supervision (for the entire output)
-def compute_reward_os(question, output):
+def reward_outcome(question, output):
     ground_truth = get_groundtruth(question)
     if output == ground_truth:
         return 1.0
     else:
         return 0.0
 
-def compute_advantages_os(rewards, output_lengths):
+def adv_outcome(rewards, output_lengths):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
     std = r.std(unbiased=False)
@@ -50,20 +49,23 @@ def compute_advantages_os(rewards, output_lengths):
 
 
 # Process supervision (for each step in the output)
-def compute_reward_ps(question, output):
+def split_steps(output):
+    return output.split('\n')
+
+def reward_process(question, output):
     pass
 
-def compute_advantages_ps(rewards, output_lengths):
+def adv_process(rewards, output_lengths):
     pass 
 
 
-def gpro_objective_fn(pi_theta, pi_ref, advantages, epsilon, beta):
+def gpro_loss(pi_theta, pi_ref, advantages, epsilon, beta):
    pass
 
 def update_policy(): pass
 
 
-def grpo(
+def train_grpo(
     pi_theta_init, # initial policy model
     r_phi, # reward function
     D, # dataset of questions
@@ -74,23 +76,23 @@ def grpo(
     M, # number of batches per iteration
     G # number of sample outputs per question     
 ):
-    pi_theta = clone_model(pi_theta_init)
+    pi_theta = copy_model(pi_theta_init)
     
     for i in range(I):
-        pi_ref = clone_model(pi_theta)
+        pi_ref = copy_model(pi_theta)
 
         for m in range(M):
             D_b = sample_batch(D)
-            pi_theta_old = clone_model(pi_theta)
+            pi_theta_old = copy_model(pi_theta)
 
             all_outputs = []
             all_rewards = []
             all_advantages = []
 
             for q in D_b:
-                outputs, output_lengths = sample_outputs(pi_theta_old, q, G)
+                outputs, output_lengths = generate_outputs(pi_theta_old, q, G)
                 rewards = [r_phi(q, o) for o in outputs]
-                advantages = compute_advantages_os(rewards, output_lengths)
+                advantages = adv_outcome(rewards, output_lengths)
 
                 all_outputs.append(outputs)
                 all_rewards.append(rewards)
