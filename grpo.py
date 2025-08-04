@@ -28,15 +28,16 @@ def sample_outputs(policy_model, question, group_size):
 def get_groundtruth(question):
     return "ground_truth_answer_for_" + question
 
-def reward_function(question, output):
+
+# Outcome supervision (for the entire output)
+def compute_reward_os(question, output):
     ground_truth = get_groundtruth(question)
     if output == ground_truth:
         return 1.0
     else:
         return 0.0
 
-# Outcome supervision
-def compute_advantages(rewards, output_lengths):
+def compute_advantages_os(rewards, output_lengths):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
     std = r.std(unbiased=False)
@@ -48,8 +49,18 @@ def compute_advantages(rewards, output_lengths):
     return advantages
 
 
-def update_policy(): pass
+# Process supervision (for each step in the output)
+def compute_reward_ps(question, output):
+    pass
 
+def compute_advantages_ps(rewards, output_lengths):
+    pass 
+
+
+def gpro_objective_fn(pi_theta, pi_ref, advantages, epsilon, beta):
+   pass
+
+def update_policy(): pass
 
 
 def grpo(
@@ -79,7 +90,7 @@ def grpo(
             for q in D_b:
                 outputs, output_lengths = sample_outputs(pi_theta_old, q, G)
                 rewards = [r_phi(q, o) for o in outputs]
-                advantages = compute_advantages(rewards, output_lengths)
+                advantages = compute_advantages_os(rewards, output_lengths)
 
                 all_outputs.append(outputs)
                 all_rewards.append(rewards)
