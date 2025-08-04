@@ -16,7 +16,7 @@ def sample_outputs(policy_model, question, group_size):
     output_lengths = []
 
     for _ in range(group_size):
-        output = policy_model.run(question)
+        output = policy_model.generate(question)
         outputs.append(output)
         tokenized = policy_model.tokenizer.encode(
             output, 
@@ -35,6 +35,7 @@ def reward_function(question, output):
     else:
         return 0.0
 
+# Outcome supervision
 def compute_advantages(rewards, output_lengths):
     r = torch.tensor(rewards, dtype=torch.float32)
     mean = r.mean()
