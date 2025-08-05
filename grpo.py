@@ -13,6 +13,7 @@ def sample_batch(dataset, batch_size=4):
 def generate_outputs(policy_model, question, group_size):
     outputs = []
     output_lengths = []
+    output_tokenized = []
 
     for _ in range(group_size):
         output = policy_model.generate(question)
@@ -22,7 +23,8 @@ def generate_outputs(policy_model, question, group_size):
             add_special_tokens=False, 
         )
         output_lengths.append(len(tokenized))
-    return outputs, output_lengths
+        output_tokenized.append(tokenized)
+    return outputs, output_lengths, output_tokenized
 
 def get_groundtruth(question):
     return "ground_truth_answer_for_" + question
@@ -66,7 +68,7 @@ def update_policy(): pass
 
 
 def train_grpo(
-    pi_theta_init, # initial policy model
+    pi_old, # initial policy model
     r_phi, # reward function
     D, # dataset of questions
     epsilon, # clip parameter
@@ -76,21 +78,18 @@ def train_grpo(
     M, # number of batches per iteration
     G # number of sample outputs per question     
 ):
-    pi_theta = copy_model(pi_theta_init)
+    pi_theta = copy_model(pi_old)
     
     for i in range(I):
-        pi_ref = copy_model(pi_theta)
-
         for m in range(M):
             D_b = sample_batch(D)
-            pi_theta_old = copy_model(pi_theta)
 
             all_outputs = []
             all_rewards = []
             all_advantages = []
 
             for q in D_b:
-                outputs, output_lengths = generate_outputs(pi_theta_old, q, G)
+                outputs, output_lengths = generate_outputs(pi_old, q, G)
                 rewards = [r_phi(q, o) for o in outputs]
                 advantages = adv_outcome(rewards, output_lengths)
 
